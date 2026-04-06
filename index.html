@@ -8,57 +8,55 @@
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; }
-        .study-card { transition: all 0.25s ease; border-color: #f1f5f9; }
-        .study-card:hover { transform: translateY(-7px); box-shadow: 0 25px 50px rgba(0,0,0,0.06); border-color: #e2e8f0; }
-        /* 줄바꿈을 화면에 그대로 보여주는 설정 */
+        .study-card { transition: all 0.25s ease; border: 1px solid #f1f5f9; }
+        .study-card:hover { transform: translateY(-7px); box-shadow: 0 25px 50px rgba(0,0,0,0.06); border-color: #153161; }
         .content-text { white-space: pre-wrap; word-break: break-all; }
-        /* 서울대 네이비 컬러 톤 */
         .snu-navy { color: #153161; }
         .snu-bg-navy { background-color: #153161; }
-        .snu-border-navy { border-color: #153161; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-900 overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen text-slate-900">
 
     <div class="max-w-7xl mx-auto px-5 py-16">
         
-        <header class="text-center mb-20 bg-white p-12 rounded-[3.5rem] shadow-sm border border-slate-100 position-relative">
-            <div class="inline-block px-5 py-1 snu-bg-navy text-white rounded-full text-xs font-black mb-6 tracking-widest uppercase shadow-md">ROAD TO SNU</div>
+        <header class="text-center mb-16 bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-100">
+            <div class="inline-block px-5 py-1 snu-bg-navy text-white rounded-full text-[10px] font-black mb-6 tracking-widest uppercase">ROAD TO SNU</div>
             
-            <div class="flex items-center justify-center gap-6 md:gap-10 mb-8 max-w-5xl mx-auto">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Seoul_National_University_insignia.png" alt="SNU Logo" class="h-16 md:h-20 w-auto opacity-95">
-                <h1 class="text-4xl md:text-5xl font-black snu-navy leading-tight tracking-tight flex-shrink-0">실시간 교재별<br>학습 현황</h1>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Seoul_National_University_insignia.png" alt="SNU Logo" class="h-16 md:h-20 w-auto opacity-95">
+            <div class="flex items-center justify-center gap-4 md:gap-10 mb-8">
+                <img src="snu_ui_download.png" alt="SNU" class="h-16 md:h-24 w-auto object-contain">
+                <h1 class="text-3xl md:text-5xl font-black snu-navy leading-tight tracking-tight">실시간 교재별<br>학습 현황</h1>
+                <img src="snu_ui_download.png" alt="SNU" class="h-16 md:h-24 w-auto object-contain">
             </div>
 
-            <p class="text-slate-600 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto">
-                2027학년도 서울대학교 입학을 목표로 수능까지 사용할 교재를 정리했습니다.<br>
-                <span class="font-bold snu-navy italic underline decoration-blue-200 underline-offset-4">아들이 어떻게 공부하고 있는지 실시간으로 알 수 있습니다.</span>
+            <p class="text-slate-600 text-lg leading-relaxed max-w-3xl mx-auto">
+                2027학년도 서울대학교 입학을 목표로 수능 교재를 정리했습니다.<br>
+                <span class="font-bold snu-navy underline decoration-blue-100 underline-offset-4">아들의 학습 현황을 실시간으로 확인하실 수 있습니다.</span>
             </p>
-            <div id="last-update" class="text-[10px] text-slate-300 mt-10 font-mono tracking-widest uppercase">데이터 연결 중...</div>
+            <div id="last-update" class="text-[10px] text-slate-300 mt-10 font-mono tracking-widest uppercase font-bold"></div>
         </header>
 
-        <div id="study-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <div class="col-span-full text-center py-20 text-slate-400 font-medium">
-                데이터를 안전하게 분석 중입니다...
+        <div id="study-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="col-span-full text-center py-20 text-slate-400 font-medium animate-pulse">
+                데이터를 연결하는 중입니다...
             </div>
         </div>
 
-        <footer class="mt-28 text-center text-slate-400 text-xs pb-10 border-t border-slate-100 pt-12">
-            <p>© 2026 Study Dashboard. 모든 학습 데이터는 구글 시트와 실시간 연동됩니다.</p>
+        <footer class="mt-28 text-center text-slate-300 text-[10px] pb-10 tracking-tighter">
+            VERITAS LUX MEA • 2026 STUDY DASHBOARD SYSTEM
         </footer>
     </div>
 
     <script>
-        // 🌟 [본인의 구글 시트 CSV 주소로 꼭 바꿔주세요!]
+        // 🌟 [중요] 본인의 구글 시트 CSV 주소를 아래 따옴표 안에 꼭 넣어주세요!
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZBXfqKDnblDo8nQmvcnxBCBkDJ3OieS-FPAd_6DVDb2ff8kVCGvWIArYeL_D_ya8iSqDp86ccpvp8/pub?output=csv';
 
         async function fetchStudyData() {
             try {
                 const response = await fetch(sheetUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
                 const csvData = await response.text();
                 
-                // 줄바꿈과 쉼표가 섞인 데이터를 완벽하게 분석하는 로직
+                // CSV 파싱 (줄바꿈 대응)
                 const rows = [];
                 let currentLine = [];
                 let currentField = '';
@@ -66,17 +64,12 @@
 
                 for (let i = 0; i < csvData.length; i++) {
                     const char = csvData[i];
-                    const nextChar = csvData[i + 1];
-
-                    if (char === '"' && inQuotes && nextChar === '"') {
-                        currentField += '"'; i++;
-                    } else if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        currentLine.push(currentField);
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) {
+                        currentLine.push(currentField.trim());
                         currentField = '';
                     } else if (char === '\n' && !inQuotes) {
-                        currentLine.push(currentField);
+                        currentLine.push(currentField.trim());
                         rows.push(currentLine);
                         currentLine = [];
                         currentField = '';
@@ -85,38 +78,59 @@
                     }
                 }
                 if (currentField || currentLine.length > 0) {
-                    currentLine.push(currentField);
+                    currentLine.push(currentField.trim());
                     rows.push(currentLine);
                 }
 
                 const container = document.getElementById('study-container');
                 container.innerHTML = '';
 
-                // 첫 줄(헤더) 제외하고 실제 데이터만 필터링
-                const dataRows = rows.slice(1).filter(r => r[0] && r[0].trim() !== "");
+                // 데이터 필터링 (첫 줄 제외 및 빈 줄 제거)
+                const dataRows = rows.slice(1).filter(r => r[0] && r[0] !== "");
 
                 if (dataRows.length === 0) {
-                    container.innerHTML = '<div class="col-span-full text-center py-20 text-slate-300">표시할 데이터가 없습니다. 시트를 확인해 주세요.</div>';
+                    container.innerHTML = '<div class="col-span-full text-center py-20 text-slate-300">표시할 학습 데이터가 없습니다.</div>';
                     return;
                 }
 
-                // 최신 데이터가 위로 오게 역순 정렬하여 카드 생성
                 dataRows.reverse().forEach(cols => {
                     const [bookName, difficulty, content, pages, cheers] = cols;
-
                     const card = `
-                        <div class="bg-white p-8 rounded-[2.5rem] border study-card flex flex-col justify-between h-full shadow-sm">
+                        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm study-card flex flex-col justify-between h-full">
                             <div>
                                 <div class="flex justify-between items-start mb-6">
-                                    <span class="px-3 py-1 snu-bg-navy text-white text-[10px] font-black rounded-lg uppercase tracking-wider">
-                                        LEVEL: ${difficulty || '-'}
+                                    <span class="px-2.5 py-1 snu-bg-navy text-white text-[9px] font-black rounded-md tracking-wider">
+                                        LV: ${difficulty || '-'}
                                     </span>
-                                    <span class="text-slate-400 text-[11px] font-bold bg-slate-50 px-2 py-1 rounded">
-                                        ${pages || 0} PAGES
+                                    <span class="text-slate-400 text-[10px] font-bold bg-slate-50 px-2 py-1 rounded">
+                                        ${pages || 0} P
                                     </span>
                                 </div>
-                                
-                                <h2 class="text-2xl font-black snu-navy mb-5 leading-tight">${bookName}</h2>
-                                
-                                <div class="bg-slate-50 p-6 rounded-[1.5rem] mb-6">
-                                    <p class="text-slate-
+                                <h2 class="text-xl font-black snu-navy mb-5 leading-tight">${bookName}</h2>
+                                <div class="bg-slate-50 p-5 rounded-2xl mb-6">
+                                    <p class="text-slate-600 text-sm leading-relaxed content-text">${content || '기록 없음'}</p>
+                                </div>
+                            </div>
+                            ${cheers ? `
+                            <div class="mt-auto p-4 bg-indigo-50/50 rounded-xl border-l-4 border-[#153161]">
+                                <p class="text-[9px] snu-navy font-black mb-1 italic opacity-70 uppercase tracking-widest">Message</p>
+                                <p class="text-slate-800 text-xs font-semibold content-text leading-snug">${cheers}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+
+                document.getElementById('last-update').innerText = `SYNCED: ${new Date().toLocaleString()}`;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('study-container').innerHTML = '<div class="col-span-full text-center py-20 text-red-300 font-bold">구글 시트 주소를 확인해주세요.</div>';
+            }
+        }
+
+        fetchStudyData();
+        setInterval(fetchStudyData, 30000);
+    </script>
+</body>
+</html>
