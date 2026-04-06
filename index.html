@@ -3,117 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 상세 학습 현황 대시보드</title>
+    <title>2027 수능 대비 학습 대시보드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { font-family: 'Pretendard', sans-serif; }
-        .study-card { transition: all 0.2s ease-in-out; }
-        .study-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
-        /* 시트에서 줄바꿈한 내용을 그대로 보여주는 마법의 설정 */
-        .content-box { white-space: pre-wrap; word-break: break-all; }
+        body { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; }
+        .study-card { transition: all 0.25s ease; }
+        .study-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
+        /* 줄바꿈을 화면에 그대로 보여주는 설정 */
+        .content-text { white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen text-slate-900">
 
-    <div class="max-w-6xl mx-auto px-4 py-10">
+    <div class="max-w-6xl mx-auto px-4 py-12">
         
-        <header class="text-center mb-12 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-            <h1 class="text-3xl font-bold text-slate-900 mb-4">📚 실시간 교재별 학습 현황</h1>
-            <p class="text-slate-600 text-lg leading-relaxed">
+        <header class="text-center mb-16 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
+            <div class="inline-block px-4 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-bold mb-4">REAL-TIME DASHBOARD</div>
+            <h1 class="text-4xl font-black text-slate-900 mb-6">📚 실시간 교재별 학습 현황</h1>
+            <p class="text-slate-600 text-lg leading-relaxed max-w-2xl mx-auto">
                 2027학년도 수능을 준비하기 위해 수능까지 사용할 교재를 정리했습니다.<br>
-                <strong class="text-blue-600">아들이 어떻게 공부하고 있는지 실시간으로 알 수 있습니다.</strong>
+                <span class="font-bold text-blue-600 italic underline decoration-blue-200 underline-offset-4">아들이 어떻게 공부하고 있는지 실시간으로 알 수 있습니다.</span>
             </p>
-            <div id="last-update" class="text-xs text-slate-400 mt-6 font-mono tracking-widest uppercase"></div>
+            <div id="last-update" class="text-[10px] text-slate-300 mt-8 font-mono tracking-widest uppercase"></div>
         </header>
 
         <div id="study-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="col-span-full text-center py-20 text-slate-400">
-                데이터를 불러오는 중입니다...
+            <div class="col-span-full text-center py-20 text-slate-400 font-medium">
+                데이터를 안전하게 불러오는 중입니다...
             </div>
         </div>
 
-        <footer class="mt-20 text-center text-slate-400 text-sm pb-10 border-t border-slate-200 pt-10">
-            <p>입력한 교재 정보가 실시간으로 반영됩니다.</p>
+        <footer class="mt-24 text-center text-slate-400 text-xs pb-10 border-t border-slate-100 pt-10">
+            <p>© 2026 Study Dashboard. 모든 학습 데이터는 구글 시트와 실시간 연동됩니다.</p>
         </footer>
     </div>
 
     <script>
-        // 🌟 내 구글 시트 CSV 주소 (그대로 유지함)
+        // 🌟 [본인의 구글 시트 CSV 주소로 꼭 바꿔주세요!]
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZBXfqKDnblDo8nQmvcnxBCBkDJ3OieS-FPAd_6DVDb2ff8kVCGvWIArYeL_D_ya8iSqDp86ccpvp8/pub?output=csv';
 
         async function fetchStudyData() {
             try {
                 const response = await fetch(sheetUrl);
-                if (!response.ok) throw new Error('연결 실패');
+                const csvData = await response.text();
                 
-                const data = await response.text();
-                
-                // 줄바꿈이 있는 데이터를 안전하게 한 줄씩 나누기
-                const rows = data.split('\n').slice(1);
-                
+                // 줄바꿈과 쉼표가 섞인 데이터를 완벽하게 분석하는 로직
+                const rows = [];
+                let currentLine = [];
+                let currentField = '';
+                let inQuotes = false;
+
+                for (let i = 0; i < csvData.length; i++) {
+                    const char = csvData[i];
+                    const nextChar = csvData[i + 1];
+
+                    if (char === '"' && inQuotes && nextChar === '"') {
+                        currentField += '"'; i++;
+                    } else if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        currentLine.push(currentField);
+                        currentField = '';
+                    } else if (char === '\n' && !inQuotes) {
+                        currentLine.push(currentField);
+                        rows.push(currentLine);
+                        currentLine = [];
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+                if (currentField || currentLine.length > 0) {
+                    currentLine.push(currentField);
+                    rows.push(currentLine);
+                }
+
                 const container = document.getElementById('study-container');
                 container.innerHTML = '';
 
-                const now = new Date();
-                document.getElementById('last-update').innerText = `LAST UPDATED: ${now.toLocaleString()}`;
+                // 첫 줄(헤더) 제외하고 실제 데이터만 필터링
+                const dataRows = rows.slice(1).filter(r => r[0] && r[0].trim() !== "");
 
-                if (rows.length === 0 || (rows.length === 1 && !rows[0].trim())) {
-                    container.innerHTML = '<div class="col-span-full text-center py-20 text-slate-400">아직 입력된 학습 데이터가 없습니다.</div>';
+                if (dataRows.length === 0) {
+                    container.innerHTML = '<div class="col-span-full text-center py-20 text-slate-300">표시할 데이터가 없습니다. 시트를 확인해 주세요.</div>';
                     return;
                 }
 
-                // 최신 데이터가 위로 오게 역순 정렬
-                rows.reverse().forEach(row => {
-                    const cleanRow = row.trim();
-                    if (!cleanRow) return;
-
-                    // 쉼표로 데이터 분리 (최대 5개 열: 교재, 난이도, 내용, 페이지, 응원)
-                    const cols = cleanRow.split(',');
+                // 최신 데이터가 위로 오게 역순 정렬하여 카드 생성
+                dataRows.reverse().forEach(cols => {
                     const [bookName, difficulty, content, pages, cheers] = cols;
 
                     const card = `
-                        <div class="bg-white p-7 rounded-[2.5rem] border border-slate-100 shadow-sm study-card flex flex-col justify-between">
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm study-card flex flex-col justify-between h-full">
                             <div>
-                                <div class="flex justify-between items-start mb-5">
-                                    <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full uppercase tracking-tighter">
-                                        LV: ${difficulty || '-'}
+                                <div class="flex justify-between items-start mb-6">
+                                    <span class="px-3 py-1 bg-indigo-50 text-indigo-500 text-[10px] font-black rounded-lg uppercase tracking-wider">
+                                        LEVEL: ${difficulty || '-'}
                                     </span>
-                                    <span class="text-slate-400 text-xs font-semibold bg-slate-50 px-2 py-1 rounded-md">
-                                        ${pages || 0} PAGE
+                                    <span class="text-slate-400 text-[11px] font-bold bg-slate-50 px-2 py-1 rounded">
+                                        ${pages || 0} PAGES
                                     </span>
                                 </div>
                                 
-                                <h2 class="text-xl font-extrabold text-slate-800 mb-4 leading-tight">${bookName || '교재명 없음'}</h2>
+                                <h2 class="text-2xl font-black text-slate-800 mb-5 leading-tight">${bookName}</h2>
                                 
-                                <div class="bg-slate-50 p-5 rounded-2xl mb-5">
-                                    <p class="text-slate-600 text-sm leading-relaxed content-box">${content || '상세 내용이 없습니다.'}</p>
+                                <div class="bg-slate-50 p-6 rounded-[1.5rem] mb-6">
+                                    <p class="text-slate-600 text-[15px] leading-relaxed content-text">${content || '기록된 내용이 없습니다.'}</p>
                                 </div>
                             </div>
 
                             ${cheers && cheers.trim() !== "" ? `
-                            <div class="mt-2 p-4 bg-orange-50 rounded-2xl border-l-4 border-orange-400">
-                                <p class="text-[10px] text-orange-500 font-bold mb-1 italic">MOM & DAD MESSAGE</p>
-                                <p class="text-orange-900 text-sm font-medium content-box">${cheers}</p>
+                            <div class="mt-auto p-5 bg-amber-50 rounded-2xl border-l-4 border-amber-400">
+                                <p class="text-[10px] text-amber-500 font-black mb-2 italic tracking-widest uppercase text-center border-b border-amber-100 pb-1">Parent's Message</p>
+                                <p class="text-amber-900 text-sm font-semibold content-text text-center">${cheers}</p>
                             </div>
                             ` : ''}
                         </div>
                     `;
                     container.innerHTML += card;
                 });
+
+                document.getElementById('last-update').innerText = `LAST SYNC: ${new Date().toLocaleString()}`;
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('study-container').innerHTML = `
-                    <div class="col-span-full text-center py-20">
-                        <p class="text-red-500 font-bold text-lg">데이터를 불러올 수 없습니다.</p>
-                        <p class="text-slate-400 text-sm mt-2">시트 주소나 인터넷 연결을 확인해 주세요.</p>
-                    </div>
-                `;
+                console.error("Fetch Error:", error);
+                document.getElementById('study-container').innerHTML = '<div class="col-span-full text-center py-20 text-red-400">데이터 연결에 실패했습니다.</div>';
             }
         }
 
         fetchStudyData();
-        setInterval(fetchStudyData, 30000); // 30초마다 자동 업데이트
+        // 30초마다 자동 새로고침
+        setInterval(fetchStudyData, 30000);
     </script>
 </body>
 </html>
