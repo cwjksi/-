@@ -44,7 +44,23 @@
                 if (!response.ok) throw new Error('연결 실패');
                 
                 const data = await response.text();
-                const rows = data.split('\n');
+                // 줄바꿈이 포함된 데이터를 안전하게 나누는 마법의 코드입니다.
+const rows = data.match(/(".*?"|[^",\n]+)(?=\s*,|\s*\n|$)/gm);
+// 위 방식이 어려우면 아래의 더 쉬운 방식으로 교체해볼게요. (기존 코드 유지하며 보정)
+const rawRows = data.split('\n').slice(1);
+const rows = [];
+let tempRow = "";
+
+rawRows.forEach(line => {
+    // 줄이 따옴표로 시작하거나 끝나지 않으면 내용이 이어진 것으로 판단합니다.
+    if (line.split(',').length < 4) {
+        tempRow += " " + line;
+    } else {
+        if (tempRow) rows.push(tempRow);
+        tempRow = line;
+    }
+});
+if (tempRow) rows.push(tempRow);
                 
                 const container = document.getElementById('study-container');
                 container.innerHTML = '';
